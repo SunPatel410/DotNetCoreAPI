@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
+using CityInfo.API.Model;
 
-namespace CityInfo.API.Model
+namespace CityInfo.API
 {
     public class CitiesDataStore
     {
