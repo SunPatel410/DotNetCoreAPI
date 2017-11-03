@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using CityInfo.API.Entities;
+using CityInfo.API.Interfaces;
+using CityInfo.API.Repository;
 using CityInfo.API.Services;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
@@ -25,8 +27,9 @@ namespace CityInfo.API
         {
             var builder = new ConfigurationBuilder()
                 .SetBasePath(env.ContentRootPath)
-                .AddJsonFile("appSettings.json", optional:false, reloadOnChange:true)
-                .AddJsonFile($"appSettings.{env.EnvironmentName}.json", optional:true, reloadOnChange: true);
+                .AddJsonFile("appSettings.json", optional: false, reloadOnChange: true)
+                .AddJsonFile($"appSettings.{env.EnvironmentName}.json", optional: true, reloadOnChange: true)
+                .AddEnvironmentVariables();
 
             Configuration = builder.Build();
         }
@@ -57,12 +60,17 @@ namespace CityInfo.API
 #else
             services.AddTransient<IMailService, CloudMailService>();
 #endif
-            var connnectionString = @"Server=(LocalDB)\MSSQLLocalDB;Database=CityInfoDB;Trusted_Connection=True";
-            services.AddDbContext<CityInfoContext>(x => x.UseSqlServer(connnectionString));
+
+            services.AddScoped<ICityInfoRepository, CityInfoRepository>();
+
+            services.AddDbContext<CityInfoContext>(options =>
+                options.UseSqlServer(Configuration.GetConnectionString("CityInfoDb")));
+
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
-        public void Configure(IApplicationBuilder app, IHostingEnvironment env, ILoggerFactory loggerFactory)
+        public void Configure(IApplicationBuilder app, IHostingEnvironment env, ILoggerFactory loggerFactory,
+            CityInfoContext cityInfoContext)
         {
             //logging on console and debug window
             loggerFactory.AddConsole();
@@ -79,6 +87,9 @@ namespace CityInfo.API
             {
                 app.UseExceptionHandler();
             }
+
+            //Seed database context
+            cityInfoContext.EnsureSeedDataForContext();
 
             //show status code on runtime pages
             app.UseStatusCodePages();
