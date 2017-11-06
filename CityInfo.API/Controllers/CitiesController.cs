@@ -1,8 +1,10 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using AutoMapper;
 using CityInfo.API.Interfaces;
 using CityInfo.API.Model;
 using Microsoft.AspNetCore.Mvc;
@@ -24,33 +26,31 @@ namespace CityInfo.API.Controllers
         public IActionResult GetCities()
         {
             var cityEntities = _cityInfoRepository.GetCities();
-
-            var result = new List<CityWithoutPointsOfIntrestDto>();
-
-            foreach (var cityEntity in cityEntities)
-            {
-                result.Add(new CityWithoutPointsOfIntrestDto
-                {
-                    Id = cityEntity.Id,
-                    Description = cityEntity.Description,
-                    Name = cityEntity.Name
-                });
-            }
+            var result = Mapper.Map<IEnumerable<CityWithoutPointsOfIntrestDto>>(cityEntities);
 
             return Ok(result);
         }
 
         [HttpGet("{id}")]
-        public IActionResult GetCity(int id, bool includePointsOfIntrest = false)
+        public IActionResult GetCity(int id, bool includePointsOfInterest = false)
         {
-            var cityToReturn = CitiesDataStore.Current.Cities.FirstOrDefault(x => x.Id == id);
+            var city = _cityInfoRepository.GetCity(id, includePointsOfInterest);
 
-            if (cityToReturn == null)
+            if (city == null)
             {
                 return NotFound();
             }
 
-            return Ok(cityToReturn);
+            if (includePointsOfInterest)
+            {
+                var cityResult = Mapper.Map<CityDto>(city);
+
+                return Ok(cityResult);
+            }
+
+            var cityWithOutPointsOfInterestResult = Mapper.Map<CityWithoutPointsOfIntrestDto>(city);
+
+            return Ok(cityWithOutPointsOfInterestResult);
         }
     }
 }

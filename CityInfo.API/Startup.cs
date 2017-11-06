@@ -4,6 +4,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using CityInfo.API.Entities;
 using CityInfo.API.Interfaces;
+using CityInfo.API.Model;
 using CityInfo.API.Repository;
 using CityInfo.API.Services;
 using Microsoft.AspNetCore.Builder;
@@ -38,10 +39,10 @@ namespace CityInfo.API
         // For more information on how to configure your application, visit https://go.microsoft.com/fwlink/?LinkID=398940
         public void ConfigureServices(IServiceCollection services)
         {
-            services.AddMvc()
+            services.AddMvc();
                 //Option to show XML Format when outputting the request instead of JSON
-                .AddMvcOptions(o => o.OutputFormatters.Add(
-                    new XmlDataContractSerializerOutputFormatter()));
+                //.AddMvcOptions(o => o.OutputFormatters.Add(
+                    //new XmlDataContractSerializerOutputFormatter()));
 
 
             //manipulate JSON to not have camel casing when printing json upon request
@@ -95,14 +96,16 @@ namespace CityInfo.API
             app.UseStatusCodePages();
             app.UseMvc();
 
-            //app.Run((context) =>
-            //{
-            //    throw new Exception("Example exception");
-            //});
-            //app.Run(async (context) =>
-            //{
-            //    await context.Response.WriteAsync("Hello World!");
-            //});
+            //AutoMapper
+            AutoMapper.Mapper.Initialize(cfg =>
+            {
+                cfg.CreateMap<City, CityWithoutPointsOfIntrestDto>();
+                cfg.CreateMap<City, CityDto>();
+                cfg.CreateMap<PointOfInterest, PointOfInterestDto>();
+                cfg.CreateMap<PointOfInterestForCreationDto, PointOfInterest>();
+                cfg.CreateMap<PointOfInterestForUpdateDto, PointOfInterest>();
+                cfg.CreateMap<PointOfInterest, PointOfInterestForUpdateDto>();
+            });
         }
     }
 }
