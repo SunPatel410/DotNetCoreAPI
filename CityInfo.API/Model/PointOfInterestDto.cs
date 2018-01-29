@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace CityInfo.API.Model
 {
-    public class PointOfInterestDto
+    public class PointOfInterestDto : LinkedResourceBaseDto
     {
         public int Id { get; set; }
         public string Name { get; set; }
