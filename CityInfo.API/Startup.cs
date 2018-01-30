@@ -67,9 +67,14 @@ namespace CityInfo.API
 
             services.AddScoped<ICityInfoRepository, CityInfoRepository>();
 
-            services.AddScoped<IUrlHelper, UrlHelper>(implementationFactory =>
+
+
+            services.AddSingleton<IActionContextAccessor, ActionContextAccessor>();
+
+            services.AddScoped<IUrlHelper>(factory =>
             {
-                var actionContext = implementationFactory.GetService<IActionContextAccessor>().ActionContext;
+                var actionContext = factory.GetService<IActionContextAccessor>()
+                    .ActionContext;
                 return new UrlHelper(actionContext);
             });
 
